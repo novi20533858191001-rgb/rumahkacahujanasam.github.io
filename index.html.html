@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pemanasan Global: Efek Rumah Kaca & Hujan Asam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f8ff;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .title-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse-soft {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        
+        .sun-ray {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 2s linear forwards;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* Normal Heat Reflection */
+        .heat-normal {
+            opacity: 0;
+            animation: rise-out 4s infinite linear;
+        }
+        @keyframes rise-out {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
+        }
+
+        /* Trapped Heat (Greenhouse Effect) */
+        .heat-trapped {
+            opacity: 0;
+            animation: bounce-down 4s infinite ease-in-out;
+        }
+        @keyframes bounce-down {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            45% { transform: translateY(-120px) scale(1.2); opacity: 1; } /* Hit the dome */
+            55% { transform: translateY(-120px) scale(1.3) rotate(180deg); opacity: 1; border-color: red;} /* Turn around */
+            100% { transform: translateY(-10px) scale(1.5) rotate(180deg); opacity: 0; } /* Disperse back on earth */
+        }
+
+        .smoke-puff {
+            animation: puff 3s infinite linear;
+            opacity: 0;
+        }
+
+        @keyframes puff {
+            0% { transform: scale(0.5) translateY(0); opacity: 0.8; }
+            100% { transform: scale(3) translateY(-120px); opacity: 0; }
+        }
+        
+        .gas-dome-layer {
+            border-top-left-radius: 50%;
+            border-top-right-radius: 50%;
+            border-top: 15px dashed rgba(75, 85, 99, 0.8);
+            background: linear-gradient(to bottom, rgba(107, 114, 128, 0.4), transparent);
+            transition: all 2s ease-in-out;
+            opacity: 0;
+        }
+
+        .sky-warming {
+            animation: warmUp 3s forwards;
+        }
+        @keyframes warmUp {
+            to { background-color: #fca5a5; } /* Merah muda/panas */
+        }
+
+        .thermometer-fluid {
+            transition: height 2s ease-in-out, background-color 2s;
+        }
+
+        .acid-rain-drop {
+            width: 2px;
+            height: 15px;
+            background: linear-gradient(to bottom, rgba(173, 255, 47, 0), rgba(173, 255, 47, 1));
+            position: absolute;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-20px); opacity: 1; }
+            100% { transform: translateY(250px); opacity: 0; }
+        }
+        
+        /* Damage Animations for Acid Rain */
+        .crack-path {
+            stroke-dasharray: 200;
+            stroke-dashoffset: 200;
+            transition: stroke-dashoffset 3s ease-in-out;
+        }
+        .cracked .crack-path {
+            stroke-dashoffset: 0;
+        }
+        
+        .tree-leaf {
+            transition: all 3s ease-in-out;
+        }
+        .dead-tree .tree-leaf {
+            fill: #8b4513; /* Coklat mati */
+            transform: translateY(40px) rotate(45deg);
+            opacity: 0.2;
+        }
+        .coral-bleached {
+            fill: #e2e8f0 !important; /* Putih pucat */
+            transition: fill 3s ease-in-out;
+        }
+
+        .scene {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        
+        .scene.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-gray-800 bg-gray-50 pb-24 md:pb-0">
+
+    <header class="bg-gradient-to-r from-teal-500 to-emerald-600 text-white p-3 md:p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center text-teal-600 font-bold text-lg md:text-xl shadow-inner">
+                    <i class="fas fa-school"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-2xl font-bold title-font tracking-wide leading-tight">MTs Surya Buana</h1>
+                    <p class="text-[10px] md:text-sm opacity-90 font-medium">IPA Kelas 9</p>
+                </div>
+            </div>
+            <div class="text-right bg-white/20 px-2 py-1 md:px-4 md:py-2 rounded-lg backdrop-blur-sm border border-white/30 hidden sm:block">
+                <p class="text-xs md:text-sm font-semibold">Disusun Oleh:</p>
+                <p class="text-sm md:text-lg font-bold title-font text-yellow-300 drop-shadow-md">Novi Ayu Lestari N., S.Pd, M.Pd</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto p-2 md:p-8 flex flex-col">
+        
+        <!-- Info Guru Mobile (Tampil hanya di HP) -->
+        <div class="sm:hidden text-center bg-teal-600 text-white py-2 px-4 rounded-b-xl shadow-md mb-3 -mt-2 mx-2">
+            <p class="text-[10px] opacity-80">Disusun Oleh:</p>
+            <p class="text-xs font-bold title-font text-yellow-300">Novi Ayu Lestari N., S.Pd, M.Pd</p>
+        </div>
+
+        <!-- Judul Utama -->
+        <div class="text-center mb-4 md:mb-8 bg-white p-3 md:p-6 rounded-2xl shadow-md border-t-4 border-teal-500">
+            <h2 class="text-xl md:text-4xl font-bold text-gray-800 mb-1 md:mb-2 title-font">Misteri Pemanasan Global</h2>
+            <p class="text-xs md:text-lg text-gray-600">Mari kita jelajahi bagaimana aktivitas manusia mengubah iklim bumi kita.</p>
+            
+            <!-- Navigasi Tab (Hidden di HP, pindah ke bawah) -->
+            <div class="hidden md:flex flex-wrap justify-center gap-4 mt-6">
+                <button onclick="showScene('intro')" id="btn-intro-desk" class="nav-btn px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-bold shadow-md flex items-center gap-2 ring-2 ring-blue-300 ring-offset-2">
+                    <i class="fas fa-home"></i> Beranda
+                </button>
+                <button onclick="showScene('greenhouse')" id="btn-greenhouse-desk" class="nav-btn px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-full font-bold shadow-md flex items-center gap-2">
+                    <i class="fas fa-temperature-high"></i> 1. Efek Rumah Kaca
+                </button>
+                <button onclick="showScene('acidrain')" id="btn-acidrain-desk" class="nav-btn px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-full font-bold shadow-md flex items-center gap-2">
+                    <i class="fas fa-cloud-showers-heavy"></i> 2. Hujan Asam
+                </button>
+            </div>
+        </div>
+
+        <div id="scene-intro" class="scene active bg-white rounded-2xl md:rounded-3xl shadow-xl overflow-hidden flex-grow border border-gray-100">
+            <div class="flex flex-col md:flex-row h-full">
+                <div class="w-full md:w-1/2 p-5 md:p-8 flex flex-col justify-center">
+                    <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs md:text-sm font-bold mb-3 w-max">Ayo Belajar!</span>
+                    <h3 class="text-2xl md:text-4xl font-bold text-gray-800 mb-4 leading-tight title-font">Selamat Datang di <br><span class="text-teal-600">Lab Virtual IPA</span></h3>
+                    <p class="text-sm md:text-lg text-gray-600 mb-4 leading-relaxed">
+                        Halo siswa-siswi kelas 9! Bumi kita sedang tidak baik-baik saja. Suhu terus meningkat dan cuaca semakin ekstrem. 
+                    </p>
+                    <p class="text-sm md:text-lg text-gray-600 mb-6 leading-relaxed">
+                        Gunakan menu navigasi untuk melihat animasi tentang <strong class="text-orange-500">Efek Rumah Kaca</strong> dan <strong class="text-purple-600">Hujan Asam</strong>.
+                    </p>
+                    <div class="p-3 md:p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
+                        <p class="text-xs md:text-sm text-yellow-800 font-semibold"><i class="fas fa-lightbulb mr-2"></i>Petunjuk:</p>
+                        <p class="text-xs md:text-sm text-yellow-700 mt-1">Perhatikan baik-baik animasi dan teks penjelasan. Temukan bagaimana proses terbentuknya dan dampaknya!</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 bg-blue-50 p-6 md:p-8 flex items-center justify-center relative overflow-hidden">
+                    <div class="relative w-48 h-48 md:w-80 md:h-80 flex justify-center items-center" style="animation: float 4s ease-in-out infinite;">
+                        <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+                            <!-- Globe (Bumi) -->
+                            <circle cx="100" cy="100" r="80" fill="#3b82f6" />
+                            <!-- Daratan (Peta Abstrak) -->
+                            <path d="M 40 70 Q 60 40 90 60 Q 120 80 100 120 Q 80 160 50 140 Q 20 120 40 70 Z" fill="#22c55e" opacity="0.9"/>
+                            <path d="M 120 40 Q 150 30 170 60 Q 180 90 150 100 Q 120 110 120 40 Z" fill="#22c55e" opacity="0.9"/>
+                            <path d="M 130 140 Q 160 130 170 160 Q 150 180 130 140 Z" fill="#22c55e" opacity="0.9"/>
+                            
+                            <!-- Termometer Pemanasan Global -->
+                            <rect x="150" y="40" width="18" height="80" rx="9" fill="#f8fafc" stroke="#94a3b8" stroke-width="2" />
+                            <!-- Cairan Merah Bawah -->
+                            <circle cx="159" cy="130" r="18" fill="#ef4444" />
+                            <!-- Cairan Merah Naik -->
+                            <rect x="155" y="60" width="8" height="60" fill="#ef4444" />
+                            
+                            <!-- Garis Indikator Suhu -->
+                            <line x1="150" y1="60" x2="159" y2="60" stroke="#94a3b8" stroke-width="2" />
+                            <line x1="150" y1="80" x2="159" y2="80" stroke="#94a3b8" stroke-width="2" />
+                            <line x1="150" y1="100" x2="159" y2="100" stroke="#94a3b8" stroke-width="2" />
+                            
+                            <!-- Aksen Kilauan (Glossy) di Bumi -->
+                            <path d="M 35 60 Q 70 20 110 30 Q 80 50 40 90 Z" fill="#ffffff" opacity="0.3" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCENE: EFEK RUMAH KACA -->
+        <div id="scene-greenhouse" class="scene bg-white rounded-2xl md:rounded-3xl shadow-xl overflow-hidden flex-grow border border-gray-100">
+            <div class="flex flex-col lg:flex-row h-full">
+                
+                <!-- Kanvas Animasi -->
+                <div id="ghg-sky" class="w-full lg:w-3/5 bg-gradient-to-b from-blue-400 via-blue-200 to-green-100 relative h-[45vh] lg:min-h-[450px] overflow-hidden rounded-t-2xl lg:rounded-l-3xl lg:rounded-tr-none transition-colors duration-1000">
+                    
+                    <!-- Termometer Global -->
+                    <div class="absolute top-2 right-2 md:top-4 md:right-4 w-10 md:w-12 h-24 md:h-32 bg-white/50 backdrop-blur rounded-full border-2 border-white/80 p-1 md:p-2 flex flex-col items-center justify-end z-50 shadow-sm">
+                        <div class="w-2 md:w-4 h-full bg-gray-200 rounded-full relative overflow-hidden">
+                            <div id="thermo-fluid" class="absolute bottom-0 w-full h-[30%] bg-blue-500 thermometer-fluid"></div>
+                        </div>
+                        <div class="w-6 md:w-8 h-6 md:h-8 rounded-full bg-blue-500 mt-[-8px] md:mt-[-10px] z-10 thermometer-fluid" id="thermo-bulb"></div>
+                        <span class="text-[8px] md:text-[10px] font-bold mt-1 text-gray-700 text-center leading-none">Suhu<br>Bumi</span>
+                    </div>
+
+                    <!-- Matahari -->
+                    <div class="absolute top-2 left-2 md:top-4 md:left-4 w-16 h-16 md:w-24 md:h-24 text-yellow-300" style="animation: pulse-soft 3s infinite;">
+                        <svg viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="25" fill="#FCD34D"/>
+                            <path d="M50,10 L50,20 M50,80 L50,90 M10,50 L20,50 M80,50 L90,50 M22,22 L29,29 M71,71 L78,78 M22,78 L29,71 M71,22 L78,29" stroke="#FCD34D" stroke-width="6" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+
+                    <!-- Kaca / Kubah Rumah Kaca (Muncul di step 2) -->
+                    <div id="gas-dome" class="absolute bottom-1/4 left-[10%] w-[80%] h-[50%] gas-dome-layer z-20 flex items-start justify-center pt-2">
+                        <span id="dome-text" class="text-[10px] md:text-sm font-bold text-gray-700 bg-white/70 px-2 py-1 md:px-3 md:py-1 rounded-full opacity-0 transition-opacity duration-1000 border border-gray-400">Lapisan Gas CO₂</span>
+                    </div>
+
+                    <!-- Permukaan Bumi -->
+                    <div class="absolute bottom-0 w-full h-1/4 bg-gradient-to-t from-green-600 to-green-400 rounded-t-[50%] z-30 flex justify-center items-center">
+                        <span class="text-white/50 font-bold text-lg md:text-xl tracking-widest mt-2 md:mt-4">BUMI</span>
+                    </div>
+
+                    <!-- Pabrik -->
+                    <div class="absolute bottom-[10%] right-[10%] md:right-[15%] w-16 h-20 md:w-24 md:h-32 z-40">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                            <rect x="20" y="50" width="60" height="50" fill="#64748b"/>
+                            <polygon points="15,50 50,30 85,50" fill="#475569"/>
+                            <rect x="35" y="10" width="10" height="30" fill="#475569"/>
+                            <rect x="65" y="20" width="8" height="20" fill="#475569"/>
+                        </svg>
+                        <!-- Asap Animasi -->
+                        <div id="smoke-container" class="absolute top-[-30px] left-[20px] md:top-[-40px] md:left-[35px] w-24 md:w-32 h-32 md:h-40 opacity-0 transition-opacity duration-500">
+                            <div class="text-[8px] md:text-xs font-bold text-gray-800 bg-white/80 px-1 rounded absolute smoke-puff" style="left: 0px; animation-delay: 0s;">CO₂</div>
+                            <div class="text-[8px] md:text-xs font-bold text-gray-800 bg-white/80 px-1 rounded absolute smoke-puff" style="left: 10px; animation-delay: 0.5s;">CO₂</div>
+                            <div class="text-[8px] md:text-xs font-bold text-gray-800 bg-white/80 px-1 rounded absolute smoke-puff" style="left: -15px; animation-delay: 1s;">Metana</div>
+                        </div>
+                    </div>
+
+                    <!-- Sinar Matahari Masuk -->
+                    <svg class="absolute top-0 left-0 w-full h-full z-15 pointer-events-none">
+                        <line id="sunray-in" x1="10%" y1="10%" x2="45%" y2="80%" stroke="#FCD34D" stroke-width="4" stroke-dasharray="10, 10" opacity="0"/>
+                        <text x="25%" y="40%" fill="#d97706" font-weight="bold" font-size="10" class="opacity-0 md:text-xs" id="sunray-label">Sinar Matahari (UV)</text>
+                    </svg>
+
+                    <!-- Panas Normal Memantul (Step 1) -->
+                    <div id="normal-heat-container" class="absolute bottom-[25%] left-[40%] w-8 md:w-10 h-24 md:h-32 z-15 opacity-0">
+                        <svg viewBox="0 0 50 100" class="w-full h-full">
+                            <path class="heat-normal text-orange-400" d="M25,100 Q10,75 25,50 T25,0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                        </svg>
+                        <div class="text-[8px] md:text-[10px] font-bold text-orange-600 absolute top-[-15px] md:top-[-20px] left-[-20px] whitespace-nowrap bg-white/70 px-1 rounded">Panas Terlepas</div>
+                    </div>
+
+                    <!-- Panas Terperangkap (Step 3) -->
+                    <div id="trapped-heat-container" class="absolute bottom-[25%] left-[35%] w-16 md:w-24 h-32 md:h-48 z-25 opacity-0">
+                        <svg viewBox="0 0 100 200" class="w-full h-full">
+                            <path class="heat-trapped text-red-600" d="M50,200 Q20,150 50,100 T50,0" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" style="animation-delay: 0s;"/>
+                            <path class="heat-trapped text-red-500" d="M20,200 Q-10,150 20,100 T20,0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" style="animation-delay: 1.5s;"/>
+                        </svg>
+                        <div class="text-[8px] md:text-xs font-bold text-red-700 absolute top-[30%] left-[-20px] md:left-[-40px] bg-white/90 px-1 md:px-2 py-1 rounded shadow-md border border-red-200 text-center">Panas<br>Terperangkap!</div>
+                    </div>
+                </div>
+
+                <!-- Kontrol & Penjelasan -->
+                <div class="w-full lg:w-2/5 p-4 md:p-8 bg-white flex flex-col justify-center">
+                    <div class="mb-3 md:mb-4 flex items-center gap-2 md:gap-3">
+                        <div class="p-2 md:p-3 bg-orange-100 text-orange-600 rounded-lg">
+                            <i class="fas fa-temperature-arrow-up text-xl md:text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl md:text-2xl font-bold text-gray-800 title-font">Proses Efek Rumah Kaca</h3>
+                    </div>
+                    
+                    <div class="space-y-3 md:space-y-4 mb-4 md:mb-8">
+                        <!-- Step 1 -->
+                        <div id="step-1" class="p-3 md:p-4 rounded-xl border-l-4 border-yellow-400 bg-yellow-50 transition-all duration-300">
+                            <h4 class="font-bold text-gray-800 text-sm md:text-base flex justify-between">
+                                <span>1. Kondisi Normal Bumi</span>
+                                <i class="fas fa-sun text-yellow-500"></i>
+                            </h4>
+                            <p class="text-xs md:text-sm text-gray-600 mt-1">Sinar matahari memanaskan bumi. Sebagian panas dipantulkan kembali ke luar angkasa. Suhu bumi stabil.</p>
+                        </div>
+                        
+                        <!-- Step 2 -->
+                        <div id="step-2" class="p-3 md:p-4 rounded-xl border-l-4 border-gray-300 bg-gray-50 opacity-50 transition-all duration-300 cursor-pointer hover:opacity-80" onclick="playGHGAnimation(2)">
+                            <h4 class="font-bold text-gray-800 text-sm md:text-base flex justify-between">
+                                <span>2. Lapisan Gas Terbentuk</span>
+                                <i class="fas fa-industry text-gray-500"></i>
+                            </h4>
+                            <p class="text-xs md:text-sm text-gray-600 mt-1 mb-2">Pabrik membuang emisi. Gas CO₂ naik dan membentuk **lapisan tebal seperti atap kaca** di atmosfer.</p>
+                            <button class="mt-2 text-xs md:text-sm bg-gray-200 px-4 py-2.5 rounded-lg hover:bg-gray-300 font-bold transition w-full active:scale-95 shadow-sm border border-gray-300 flex items-center justify-center gap-2"><i class="fas fa-hand-pointer text-gray-500"></i> Sentuh: Munculkan Polusi</button>
+                        </div>
+                        
+                        <!-- Step 3 -->
+                        <div id="step-3" class="p-3 md:p-4 rounded-xl border-l-4 border-gray-300 bg-gray-50 opacity-50 transition-all duration-300 cursor-pointer hover:opacity-80" onclick="playGHGAnimation(3)">
+                            <h4 class="font-bold text-gray-800 text-sm md:text-base flex justify-between">
+                                <span>3. Panas Terperangkap</span>
+                                <i class="fas fa-fire text-red-500"></i>
+                            </h4>
+                            <p class="text-xs md:text-sm text-gray-600 mt-1 mb-2">Panas bumi yang mencoba keluar **menabrak lapisan gas dan memantul kembali ke bawah**.</p>
+                            <button class="mt-2 text-xs md:text-sm bg-red-200 text-red-800 px-4 py-2.5 rounded-lg hover:bg-red-300 font-bold transition w-full active:scale-95 shadow-sm border border-red-300 flex items-center justify-center gap-2"><i class="fas fa-hand-pointer text-red-500"></i> Sentuh: Lihat Efeknya</button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="resetGHG()" class="self-end text-xs md:text-sm text-gray-500 hover:text-gray-800 underline flex items-center gap-1 p-2 active:scale-95"><i class="fas fa-undo"></i> Ulangi Simulasi</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCENE: HUJAN ASAM -->
+        <div id="scene-acidrain" class="scene bg-white rounded-2xl md:rounded-3xl shadow-xl overflow-hidden flex-grow border border-gray-100">
+             <div class="flex flex-col lg:flex-row h-full">
+                
+                <!-- Kanvas Animasi -->
+                <div id="ar-sky" class="w-full lg:w-3/5 bg-gradient-to-b from-blue-300 via-blue-200 to-gray-200 relative h-[45vh] lg:min-h-[500px] overflow-hidden rounded-t-2xl lg:rounded-l-3xl lg:rounded-tr-none transition-colors duration-1000">
+                    
+                    <!-- Awan Berubah Warna -->
+                    <div class="absolute top-0 left-0 w-full h-24 md:h-32 z-20 flex justify-center">
+                        <svg viewBox="0 0 200 100" class="w-full h-full drop-shadow-xl" preserveAspectRatio="none">
+                            <path id="cloud-back" d="M0,0 L200,0 L200,30 Q180,60 150,40 Q130,80 100,50 Q70,90 40,50 Q20,70 0,40 Z" fill="#ffffff" class="transition-colors duration-2000"/>
+                            <path id="cloud-front" d="M0,0 L200,0 L200,20 Q160,50 120,30 Q90,70 50,40 Q20,50 0,20 Z" fill="#f3f4f6" class="transition-colors duration-2000 opacity-90"/>
+                        </svg>
+                        
+                        <!-- Reaksi Kimia (Makin jelas) -->
+                        <div id="chemical-reaction" class="absolute top-6 md:top-12 left-1/2 transform -translate-x-1/2 bg-white/90 px-2 py-1 md:px-4 md:py-2 rounded-lg font-bold text-[9px] md:text-sm shadow-lg opacity-0 transition-opacity duration-1000 text-center border-b-2 md:border-b-4 border-purple-500 w-max max-w-[90%]">
+                            <div class="text-blue-800 flex items-center justify-center gap-1 md:gap-2 text-[9px] md:text-base flex-wrap">
+                                <span class="bg-gray-200 px-1 md:px-2 rounded font-mono text-red-600">SO₂</span>
+                                <span>+</span>
+                                <span class="bg-blue-100 px-1 md:px-2 rounded font-mono">H₂O</span>
+                                <span><i class="fas fa-arrow-right"></i></span>
+                                <span class="bg-purple-200 px-1 md:px-2 rounded text-purple-900 font-mono font-black">H₂SO₄ (Asam Sulfat)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Efek Hujan Asam (Container) -->
+                    <div id="acid-rain-container" class="absolute top-16 md:top-20 left-0 w-full h-full z-15 pointer-events-none overflow-hidden opacity-0 transition-opacity duration-1000"></div>
+
+                    <!-- Lingkungan Bawah -->
+                    <div class="absolute bottom-0 w-full h-1/2 flex items-end justify-between px-1 md:px-2 pb-2 md:pb-4 z-30">
+                        
+                        <!-- Area 1: Laut & Terumbu Karang -->
+                        <div class="w-1/3 relative h-full flex items-end justify-center">
+                            <div class="absolute bottom-0 w-[110%] h-16 md:h-24 bg-blue-500/80 rounded-t-lg border-t-2 border-blue-400">
+                                <div class="absolute bottom-1 md:bottom-2 left-1 md:left-4 flex gap-1 md:gap-2 scale-75 md:scale-100 origin-bottom-left" id="coral-reef">
+                                    <!-- Karang -->
+                                    <svg width="40" height="40" viewBox="0 0 60 60" class="md:w-[60px] md:h-[60px]">
+                                        <path d="M30,60 Q30,30 15,20 Q5,15 20,10 Q35,20 30,60" fill="#f43f5e" class="coral-part transition-colors duration-[3s]"/>
+                                        <path d="M30,60 Q40,25 55,20 Q60,15 45,5 Q30,20 30,60" fill="#ec4899" class="coral-part transition-colors duration-[3s]"/>
+                                    </svg>
+                                    <!-- Ikan Mati (Muncul saat hujan) -->
+                                    <div id="dead-fish" class="absolute top-[-5px] right-0 opacity-0 transition-opacity duration-[3s] text-gray-200 text-sm md:text-xl rotate-180">
+                                        <i class="fas fa-fish"></i>
+                                        <div class="text-[6px] md:text-[8px] bg-red-600 text-white px-1 rounded absolute top-0 right-[-15px]">Bleaching</div>
+                                    </div>
+                                </div>
+                                <div class="absolute w-full text-center bottom-[-15px] md:bottom-[-20px] text-[8px] md:text-xs font-bold text-white drop-shadow">Biota Laut</div>
+                            </div>
+                        </div>
+
+                        <!-- Area 2: Alam & Pohon -->
+                        <div class="w-1/3 relative h-full flex items-end justify-center pb-2 md:pb-4">
+                            <svg id="nature-tree" width="60" height="90" viewBox="0 0 80 120" class="drop-shadow-lg z-20 md:w-[80px] md:h-[120px]">
+                                <!-- Batang -->
+                                <rect x="35" y="60" width="10" height="60" fill="#78350f"/>
+                                <!-- Daun -->
+                                <circle cx="40" cy="40" r="25" fill="#22c55e" class="tree-leaf"/>
+                                <circle cx="20" cy="55" r="20" fill="#16a34a" class="tree-leaf"/>
+                                <circle cx="60" cy="55" r="20" fill="#15803d" class="tree-leaf"/>
+                                <circle cx="40" cy="20" r="20" fill="#4ade80" class="tree-leaf"/>
+                            </svg>
+                            <div class="absolute w-full text-center bottom-[-10px] text-[8px] md:text-xs font-bold text-green-800 drop-shadow bg-white/50 rounded">Hutan</div>
+                        </div>
+
+                        <!-- Area 3: Kota & Pabrik -->
+                        <div class="w-1/3 h-32 md:h-48 relative flex items-end justify-end">
+                            
+                            <!-- Pabrik di belakang -->
+                            <div class="absolute bottom-6 right-10 md:bottom-10 md:right-20 w-12 h-16 md:w-16 md:h-24 z-10 opacity-80">
+                                 <svg viewBox="0 0 100 100" class="w-full h-full">
+                                    <rect x="10" y="40" width="80" height="60" fill="#475569"/>
+                                    <rect x="25" y="0" width="15" height="40" fill="#334155"/>
+                                </svg>
+                                <!-- Tanda Gas Naik -->
+                                <div id="gas-rise" class="absolute top-[-30px] left-[0px] md:top-[-50px] md:left-[10px] opacity-0 transition-opacity duration-500">
+                                    <div class="text-[7px] md:text-sm font-bold text-red-200 bg-red-900/80 px-1 md:px-2 py-0.5 md:py-1 rounded border border-red-500 flex flex-col items-center" style="animation: float-up 2s infinite">
+                                        <span>SO₂ & NOₓ</span>
+                                        <i class="fas fa-arrow-up text-red-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gedung Kota yang akan hancur -->
+                            <div id="city-building" class="w-16 h-24 md:w-28 md:h-40 bg-stone-300 border-2 border-stone-400 relative rounded-t-lg z-20 transition-all duration-1000 shadow-lg">
+                                <div class="grid grid-cols-2 gap-1 md:gap-2 p-1 md:p-3">
+                                    <div class="bg-blue-800/80 w-full h-3 md:h-6 border-b border-stone-500"></div>
+                                    <div class="bg-blue-800/80 w-full h-3 md:h-6 border-b border-stone-500"></div>
+                                    <div class="bg-blue-800/80 w-full h-3 md:h-6 border-b border-stone-500"></div>
+                                    <div class="bg-blue-800/80 w-full h-3 md:h-6 border-b border-stone-500"></div>
+                                </div>
+                                <!-- Overlay Retakan Korosi -->
+                                <svg class="absolute top-0 left-0 w-full h-full pointer-events-none z-30">
+                                    <path d="M5,0 L8,10 L3,20 L10,30 L5,40 L12,50" fill="none" stroke="#444" stroke-width="1.5" class="crack-path"/>
+                                    <path d="M40,5 L35,15 L42,25 L38,35 L45,45" fill="none" stroke="#555" stroke-width="1.5" class="crack-path"/>
+                                    <path d="M20,60 L25,70 L22,75" fill="none" stroke="#222" stroke-width="1.5" class="crack-path"/>
+                                </svg>
+                                <div class="absolute bottom-[-15px] md:bottom-[-20px] w-full text-center text-[8px] md:text-xs font-bold text-gray-800 drop-shadow">Infrastruktur</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Kontrol & Penjelasan -->
+                <div class="w-full lg:w-2/5 p-4 md:p-8 bg-white flex flex-col justify-center">
+                     <div class="mb-3 md:mb-4 flex items-center gap-2 md:gap-3">
+                        <div class="p-2 md:p-3 bg-purple-100 text-purple-600 rounded-lg">
+                            <i class="fas fa-cloud-showers-heavy text-xl md:text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl md:text-2xl font-bold text-gray-800 title-font">Proses Hujan Asam</h3>
+                    </div>
+
+                    <div class="space-y-3 md:space-y-4 mb-4 md:mb-6">
+                        <!-- Step 1 -->
+                        <div id="ar-step-1" class="p-3 md:p-4 rounded-xl border-l-4 border-purple-400 bg-purple-50 transition-all duration-300">
+                            <h4 class="font-bold text-gray-800 text-sm md:text-base flex justify-between items-center mb-1">
+                                <span>1. Emisi Gas Pabrik</span>
+                            </h4>
+                            <p class="text-[11px] md:text-sm text-gray-600 mb-3">Asap pabrik mengandung gas <strong class="text-red-600">SO₂</strong> dan <strong class="text-red-600">NOₓ</strong> naik ke awan.</p>
+                            <button onclick="playAcidRainAnimation(1)" class="w-full text-xs md:text-sm bg-purple-200 text-purple-800 px-4 py-2.5 rounded-lg hover:bg-purple-300 font-bold transition shadow-sm border border-purple-300 active:scale-95 flex items-center justify-center gap-2"><i class="fas fa-hand-pointer"></i> Mulai Simulasi Hujan Asam</button>
+                        </div>
+                        
+                        <!-- Step 2 -->
+                        <div id="ar-step-2" class="p-3 md:p-4 rounded-xl border-l-4 border-gray-300 bg-gray-50 opacity-50 transition-all duration-300">
+                            <h4 class="font-bold text-gray-800 text-sm md:text-base flex items-center gap-2">2. Reaksi Kimia Awan <i class="fas fa-flask text-blue-500"></i></h4>
+                            <p class="text-[11px] md:text-sm text-gray-600 mt-1">Gas polutan bereaksi dengan uap air (H₂O) di dalam awan, mengubahnya menjadi awan **asam sulfat**.</p>
+                        </div>
+                        
+                        <!-- Step 3 -->
+                        <div id="ar-step-3" class="p-3 md:p-4 rounded-xl border-l-4 border-gray-300 bg-gray-50 opacity-50 transition-all duration-300">
+                            <h4 class="font-bold text-red-700 text-sm md:text-base flex items-center gap-2">3. Dampak Kehancuran <i class="fas fa-skull-crossbones"></i></h4>
+                            <div class="text-[11px] md:text-sm text-gray-600 mt-2 space-y-2 md:space-y-3">
+                                <div class="flex items-start gap-2">
+                                    <i class="fas fa-building text-stone-500 mt-1"></i>
+                                    <p>Air hujan yang sangat asam turun dan sifat korosifnya langsung **mengikis bangunan**.</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <i class="fas fa-tree text-green-600 mt-1"></i>
+                                    <p>Hujan merusak akar, membuat **daun rontok dan pohon mati**.</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <i class="fas fa-water text-blue-500 mt-1"></i>
+                                    <p>Meracuni laut, membunuh ikan, dan memicu **Terumbu Karang memutih (Bleaching)**.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="resetAcidRain()" class="self-end text-xs md:text-sm text-gray-500 hover:text-gray-800 underline flex items-center gap-1 p-2 active:scale-95"><i class="fas fa-undo"></i> Pulihkan Alam</button>
+                </div>
+             </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-[0_-10px_20px_rgba(0,0,0,0.06)] z-50 flex justify-around items-center pb-safe pt-2">
+        <button onclick="showScene('intro')" id="nav-mob-intro" class="flex flex-col items-center p-2 text-blue-600 flex-1 transition-colors active:scale-95">
+            <i class="fas fa-home text-2xl mb-1"></i>
+            <span class="text-[10px] font-bold">Beranda</span>
+        </button>
+        <button onclick="showScene('greenhouse')" id="nav-mob-greenhouse" class="flex flex-col items-center p-2 text-gray-400 hover:text-orange-500 transition-colors flex-1 active:scale-95">
+            <i class="fas fa-temperature-high text-2xl mb-1"></i>
+            <span class="text-[10px] font-bold">Rumah Kaca</span>
+        </button>
+        <button onclick="showScene('acidrain')" id="nav-mob-acidrain" class="flex flex-col items-center p-2 text-gray-400 hover:text-purple-500 transition-colors flex-1 active:scale-95">
+            <i class="fas fa-cloud-showers-heavy text-2xl mb-1"></i>
+            <span class="text-[10px] font-bold">Hujan Asam</span>
+        </button>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="hidden md:block bg-gray-800 text-white py-4 text-center mt-auto">
+        <p class="text-sm">&copy; 2024 Media Pembelajaran Interaktif. Didesain khusus untuk MTs Surya Buana.</p>
+    </footer>
+
+    <style>
+        /* Area aman untuk navigasi bawah pada iPhone/HP modern */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 10px); }
+    </style>
+
+    <script>
+        // --- Sistem Navigasi ---
+        function showScene(sceneId) {
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+            });
+            
+            if(sceneId !== 'greenhouse') resetGHG();
+            if(sceneId !== 'acidrain') resetAcidRain();
+
+            document.getElementById('scene-' + sceneId).classList.add('active');
+
+            // Update Desktop Nav
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2');
+                if (btn.classList.contains('bg-blue-500')) btn.classList.remove('ring-blue-300');
+                if (btn.classList.contains('bg-orange-500')) btn.classList.remove('ring-orange-300');
+                if (btn.classList.contains('bg-purple-500')) btn.classList.remove('ring-purple-300');
+            });
+            
+            const activeBtnDesk = document.getElementById('btn-' + sceneId + '-desk');
+            if(activeBtnDesk) {
+                activeBtnDesk.classList.add('ring-2', 'ring-offset-2');
+                if (sceneId === 'intro') activeBtnDesk.classList.add('ring-blue-300');
+                if (sceneId === 'greenhouse') activeBtnDesk.classList.add('ring-orange-300');
+                if (sceneId === 'acidrain') activeBtnDesk.classList.add('ring-purple-300');
+            }
+
+            // Update Mobile Nav
+            const mobIds = ['intro', 'greenhouse', 'acidrain'];
+            mobIds.forEach(id => {
+                const btn = document.getElementById('nav-mob-' + id);
+                if(btn) {
+                    btn.classList.remove('text-blue-600', 'text-orange-600', 'text-purple-600');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+
+            const activeBtnMob = document.getElementById('nav-mob-' + sceneId);
+            if(activeBtnMob) {
+                activeBtnMob.classList.remove('text-gray-400');
+                if (sceneId === 'intro') activeBtnMob.classList.add('text-blue-600');
+                if (sceneId === 'greenhouse') activeBtnMob.classList.add('text-orange-600');
+                if (sceneId === 'acidrain') activeBtnMob.classList.add('text-purple-600');
+            }
+            
+            if(sceneId === 'greenhouse') {
+                setTimeout(() => {
+                    document.getElementById('sunray-in').style.opacity = '1';
+                    document.getElementById('sunray-in').classList.add('sun-ray');
+                    document.getElementById('sunray-label').style.opacity = '1';
+                    // Show normal heat escaping
+                    document.getElementById('normal-heat-container').style.opacity = '1';
+                }, 500);
+            }
+        }
+
+        // --- Logika Efek Rumah Kaca ---
+        let ghgState = 1;
+        
+        function playGHGAnimation(step) {
+            if(step === 2 && ghgState === 1) {
+                // UI update
+                document.getElementById('step-1').classList.replace('border-yellow-400', 'border-gray-300');
+                document.getElementById('step-1').classList.replace('bg-yellow-50', 'bg-gray-50');
+                document.getElementById('step-2').classList.remove('opacity-50');
+                document.getElementById('step-2').classList.replace('border-gray-300', 'border-gray-600');
+                document.getElementById('step-2').classList.replace('bg-gray-50', 'bg-gray-100');
+                
+                // Animasi Pembentukan Kubah
+                document.getElementById('smoke-container').style.opacity = '1';
+                setTimeout(() => {
+                    const dome = document.getElementById('gas-dome');
+                    dome.style.opacity = '1';
+                    document.getElementById('dome-text').style.opacity = '1';
+                }, 1500); // Wait for smoke to travel up
+                
+                // Aktifkan tombol step 3
+                const step3Btn = document.querySelector('#step-3 button');
+                step3Btn.parentElement.classList.remove('opacity-50');
+                
+                ghgState = 2;
+                
+            } else if (step === 3 && ghgState === 2) {
+                // UI update
+                document.getElementById('step-2').classList.replace('border-gray-600', 'border-gray-300');
+                document.getElementById('step-2').classList.replace('bg-gray-100', 'bg-gray-50');
+                document.getElementById('step-3').classList.replace('border-gray-300', 'border-red-500');
+                document.getElementById('step-3').classList.replace('bg-gray-50', 'bg-red-50');
+                
+                // Stop normal heat, start trapped heat
+                document.getElementById('normal-heat-container').style.opacity = '0';
+                document.getElementById('trapped-heat-container').style.opacity = '1';
+                
+                // Ubah warna langit (Global Warming)
+                document.getElementById('ghg-sky').classList.add('sky-warming');
+                
+                // Naikkan Termometer
+                const fluid = document.getElementById('thermo-fluid');
+                const bulb = document.getElementById('thermo-bulb');
+                fluid.style.height = '90%';
+                fluid.style.backgroundColor = '#ef4444'; // red
+                bulb.style.backgroundColor = '#ef4444';
+                
+                ghgState = 3;
+            }
+        }
+
+        function resetGHG() {
+            ghgState = 1;
+            // UI Reset
+            document.getElementById('step-1').classList.replace('border-gray-300', 'border-yellow-400');
+            document.getElementById('step-1').classList.replace('bg-gray-50', 'bg-yellow-50');
+            document.getElementById('step-2').classList.add('opacity-50');
+            document.getElementById('step-2').classList.replace('border-gray-600', 'border-gray-300');
+            document.getElementById('step-2').classList.replace('bg-gray-100', 'bg-gray-50');
+            document.getElementById('step-3').classList.add('opacity-50');
+            document.getElementById('step-3').classList.replace('border-red-500', 'border-gray-300');
+            document.getElementById('step-3').classList.replace('bg-red-50', 'bg-gray-50');
+
+            // Animation Reset
+            document.getElementById('smoke-container').style.opacity = '0';
+            document.getElementById('gas-dome').style.opacity = '0';
+            document.getElementById('dome-text').style.opacity = '0';
+            
+            document.getElementById('normal-heat-container').style.opacity = '0'; // will be set to 1 on re-enter
+            document.getElementById('trapped-heat-container').style.opacity = '0';
+            
+            document.getElementById('ghg-sky').classList.remove('sky-warming');
+            
+            const fluid = document.getElementById('thermo-fluid');
+            const bulb = document.getElementById('thermo-bulb');
+            fluid.style.height = '30%';
+            fluid.style.backgroundColor = '#3b82f6'; // blue
+            bulb.style.backgroundColor = '#3b82f6';
+            
+            const sunray = document.getElementById('sunray-in');
+            sunray.classList.remove('sun-ray');
+            if(document.getElementById('scene-greenhouse').classList.contains('active')){
+                setTimeout(() => {
+                    sunray.classList.add('sun-ray');
+                    document.getElementById('normal-heat-container').style.opacity = '1';
+                }, 100);
+            }
+        }
+
+        // --- Logika Hujan Asam ---
+        let arState = 1;
+        
+        function playAcidRainAnimation(step) {
+            if(step === 1 && arState === 1) {
+                // Step 1: Gas Naik
+                document.getElementById('gas-rise').style.opacity = '1';
+                
+                document.getElementById('ar-step-1').classList.replace('border-purple-400', 'border-gray-300');
+                document.getElementById('ar-step-1').classList.replace('bg-purple-50', 'bg-gray-50');
+                
+                document.getElementById('ar-step-2').classList.remove('opacity-50');
+                document.getElementById('ar-step-2').classList.replace('border-gray-300', 'border-blue-400');
+                document.getElementById('ar-step-2').classList.replace('bg-gray-50', 'bg-blue-50');
+
+                // Lanjut ke step 2 otomatis setelah gas naik
+                setTimeout(() => {
+                    triggerAcidReaction();
+                }, 2000);
+                arState = 2;
+            }
+        }
+
+        function triggerAcidReaction() {
+            // Ubah warna awan jadi gelap & tampilkan rumus
+            document.getElementById('cloud-back').setAttribute('fill', '#374151');
+            document.getElementById('cloud-front').setAttribute('fill', '#4b5563');
+            document.getElementById('ar-sky').classList.replace('from-blue-300', 'from-gray-600');
+            document.getElementById('ar-sky').classList.replace('via-blue-200', 'via-gray-400');
+            
+            document.getElementById('chemical-reaction').style.opacity = '1';
+            
+            setTimeout(() => {
+                document.getElementById('ar-step-2').classList.replace('border-blue-400', 'border-gray-300');
+                document.getElementById('ar-step-2').classList.replace('bg-blue-50', 'bg-gray-50');
+                
+                document.getElementById('ar-step-3').classList.remove('opacity-50');
+                document.getElementById('ar-step-3').classList.replace('border-gray-300', 'border-red-500');
+                document.getElementById('ar-step-3').classList.replace('bg-gray-50', 'bg-red-50');
+                
+                startAcidRain();
+            }, 3500);
+        }
+
+        function startAcidRain() {
+            // Mulai partikel hujan (berwarna hijau kekuningan/asam)
+            const rainContainer = document.getElementById('acid-rain-container');
+            rainContainer.style.opacity = '1';
+            rainContainer.innerHTML = '';
+            
+            for(let i=0; i<60; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'acid-rain-drop';
+                drop.style.left = Math.random() * 100 + '%';
+                drop.style.animationDuration = (Math.random() * 0.4 + 0.4) + 's';
+                drop.style.animationDelay = Math.random() * 2 + 's';
+                rainContainer.appendChild(drop);
+            }
+
+            // Memicu efek kerusakan TERLIHAT JELAS
+            setTimeout(() => {
+                // 1. Gedung retak (Korosi)
+                document.getElementById('city-building').classList.add('cracked');
+                document.getElementById('city-building').classList.replace('bg-stone-300', 'bg-stone-500');
+                
+                // 2. Pohon Mati
+                document.getElementById('nature-tree').classList.add('dead-tree');
+                
+                // 3. Terumbu Karang Mati (Bleaching) & ikan mati muncul
+                const corals = document.querySelectorAll('.coral-part');
+                corals.forEach(coral => {
+                    coral.classList.add('coral-bleached');
+                });
+                document.getElementById('dead-fish').style.opacity = '1';
+                
+            }, 2500);
+        }
+
+        function resetAcidRain() {
+            arState = 1;
+            // Reset UI
+            document.getElementById('ar-step-1').classList.replace('border-gray-300', 'border-purple-400');
+            document.getElementById('ar-step-1').classList.replace('bg-gray-50', 'bg-purple-50');
+            document.getElementById('ar-step-2').classList.add('opacity-50');
+            document.getElementById('ar-step-2').classList.replace('border-blue-400', 'border-gray-300');
+            document.getElementById('ar-step-2').classList.replace('bg-blue-50', 'bg-gray-50');
+            document.getElementById('ar-step-3').classList.add('opacity-50');
+            document.getElementById('ar-step-3').classList.replace('border-red-500', 'border-gray-300');
+            document.getElementById('ar-step-3').classList.replace('bg-red-50', 'bg-gray-50');
+
+            // Reset Animasi Lingkungan
+            document.getElementById('gas-rise').style.opacity = '0';
+            document.getElementById('chemical-reaction').style.opacity = '0';
+            
+            // Reset Awan
+            document.getElementById('cloud-back').setAttribute('fill', '#ffffff');
+            document.getElementById('cloud-front').setAttribute('fill', '#f3f4f6');
+            document.getElementById('ar-sky').classList.replace('from-gray-600', 'from-blue-300');
+            document.getElementById('ar-sky').classList.replace('via-gray-400', 'via-blue-200');
+            
+            // Hentikan hujan
+            document.getElementById('acid-rain-container').style.opacity = '0';
+            setTimeout(() => { document.getElementById('acid-rain-container').innerHTML = ''; }, 1000);
+            
+            // Reset Kerusakan Bangunan
+            document.getElementById('city-building').classList.remove('cracked');
+            document.getElementById('city-building').classList.replace('bg-stone-500', 'bg-stone-300');
+            
+            // Reset Pohon
+            document.getElementById('nature-tree').classList.remove('dead-tree');
+            
+            // Reset Karang
+            const corals = document.querySelectorAll('.coral-part');
+            corals.forEach(coral => {
+                coral.classList.remove('coral-bleached');
+            });
+            document.getElementById('dead-fish').style.opacity = '0';
+        }
+    </script>
+</body>
+</html>
